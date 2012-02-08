@@ -11,12 +11,12 @@ build:
 ifeq ($(UNAME), Linux)
 	gcc --shared iconv_guess.c -liconv -o libiconv_guess.so
 	mv libiconv_guess.so build/
-	gcc test_shared.c build/libiconv_guess.so -o build/test_shared
+	gcc test.c build/libiconv_guess.so -o build/test_shared
 endif
 ifeq ($(UNAME), Darwin)
 	gcc -dynamiclib iconv_guess.c -liconv -o libiconv_guess.dylib
 	mv libiconv_guess.dylib build/
-	gcc test_shared.c build/libiconv_guess.dylib -o build/test_shared
+	gcc test.c build/libiconv_guess.dylib -o build/test_shared
 endif
 
 
