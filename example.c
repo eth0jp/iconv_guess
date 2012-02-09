@@ -5,6 +5,10 @@
 
 #define BUF_SIZE 10000
 
+/*
+Usage: cat txt/sjis.txt | ./example
+*/
+
 int main(void)
 {
 	const char *encodings[] = {"EUC-JP", "SJIS", "UTF-8", NULL};
