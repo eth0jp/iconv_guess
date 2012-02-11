@@ -1,9 +1,29 @@
+/*
+ * Copyright (C) 2012 Yoshida Tetsuya
+ * 
+ * This file is part of the LIBICONV_GUESS Library.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include "iconv_guess.h"
 
 
 // guess encoding
 
-void iconv_guess_encoding(const char *from, size_t from_size, const char **encodings, char *guess_enc, int *guess_score, int allowed_score)
+void iconv_guess_encoding(const char *from, size_t from_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num)
 {
 	const char *encoding;
 	char *p_from;
@@ -13,23 +33,23 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 	// iconv
 	iconv_t ic;
 	size_t ic_ret;
-	unsigned int current_guess_score;
+	unsigned int current_error_num;
 
 	// to
 	char *to, *p_to;
 	size_t to_size, p_to_size;
 
 	// tmp result
-	char tmp_guess_enc[32];
-	int min_guess_score;
+	char tmp_guessed_enc[32];
+	int min_error_num;
 	int tmp_result_flag;
 
 	// init memory
 	to = (char*)malloc(from_size);
 	to_size = from_size;
 	i = 0;
-	tmp_guess_enc[0] = '\0';
-	min_guess_score = -1;
+	tmp_guessed_enc[0] = '\0';
+	min_error_num = -1;
 
 	while (encodings[i]) {
 		// reset ptr
@@ -40,8 +60,8 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 		p_to_size = to_size;
 
 		// init iconv
-		ic = iconv_open("UTF-8", encoding);
-		current_guess_score = 0;
+		ic = iconv_open("UCS-4-INTERNAL", encoding);
+		current_error_num = 0;
 		tmp_result_flag = 1;
 
 		// iconv open error
@@ -60,7 +80,7 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 			switch (errno) {
 			case EILSEQ:
 				// continue: Input conversion stopped due to an input byte that does not belong to the input codeset.
-				current_guess_score++;
+				current_error_num++;
 				p_from++;
 				p_from_size--;
 				break;
@@ -75,13 +95,13 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 				break;
 			}
 
-			// break: Exceed the min_guess_score
-			if (-1<min_guess_score && min_guess_score<current_guess_score) {
+			// break: Exceed the min_error_num
+			if (-1<min_error_num && min_error_num<current_error_num) {
 				tmp_result_flag = 0;
 			}
 
-			// break: Exceed the allowed_score.
-			if (-1<allowed_score && allowed_score<current_guess_score) {
+			// break: Exceed the allowed_error_num.
+			if (-1<allowed_error_num && allowed_error_num<current_error_num) {
 				tmp_result_flag = 0;
 			}
 		}
@@ -91,9 +111,9 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 
 		// update tmp result
 		if (tmp_result_flag) {
-			strcpy(tmp_guess_enc, encoding);
-			min_guess_score = current_guess_score;
-			if (current_guess_score==0) {
+			strcpy(tmp_guessed_enc, encoding);
+			min_error_num = current_error_num;
+			if (current_error_num==0) {
 				break;
 			}
 		}
@@ -101,30 +121,29 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 	}
 
 	free(to);
-	strcpy(guess_enc, tmp_guess_enc);
-	if (guess_score) {
-		*guess_score = min_guess_score;
+	strcpy(guessed_enc, tmp_guessed_enc);
+	if (error_num) {
+		*error_num = min_error_num;
 	}
 }
 
 
 // guess convert
 
-int iconv_guess_convert(const char *to_encoding, const char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allow_guess_score)
+int iconv_guess_convert(const char *to_encoding, const char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allowed_error_num)
 {
 	char from_encoding[32];
-	int score;
+	int error_num;
 	iconv_t ic;
-	size_t cp_size;
 	size_t ic_ret;
 	int conv_count;
 	int result_flag;
 
 	conv_count = 0;
 	result_flag = 1;
-	iconv_guess_encoding(*from, *from_size, encodings, from_encoding, &score, allow_guess_score);
+	iconv_guess_encoding(*from, *from_size, encodings, from_encoding, &error_num, allowed_error_num);
 
-	if (-1<score) {
+	if (-1<error_num) {
 		// use iconv
 		//printf("from_encoding: %s\n", from_encoding);
 		ic = iconv_open(to_encoding, from_encoding);

@@ -1,0 +1,21 @@
+iconv_guess (libiconv_guess)
+
+iconvを使って文字コードを推測するライブラリ。
+文字列を指定された文字コード一覧へ総当りで変換し、マッピングされた文字が存在する文字コードを探しだす。
+iconvの内部エンコーディングに用いられているUCS-4-INTERNALに変換し計測する。
+変換不可能文字の出現をいくつまで許容するするかの指定も出来るため、そんなに負荷は高くない（気がする）。
+マッピングされているか否かのチェックしかしていない為、大量の文字コードをチェックさせると認識率は低くなる。
+日本語に対して使う場合は、{"EUC-JP", "SJIS", "UTF-8", NULL}辺りの指定が妥当かと思われる。
+
+対応文字コード：
+　libiconvで使える文字コード全て。
+　http://www.gnu.org/software/libiconv/
+
+使い方：
+　https://github.com/eth0jp/iconv_guess/blob/master/example.c
+
+リファレンス：
+　https://github.com/eth0jp/iconv_guess/blob/master/iconv_guess.h
+
+ライセンス：
+　LGPLv2.1 or later

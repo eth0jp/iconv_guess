@@ -34,7 +34,7 @@ ifeq ($(UNAME), Darwin)
 endif
 
 
-install: example_shared
+install: libiconv_guess.so
 	cp iconv_guess.h /usr/local/include/
 ifeq ($(UNAME), Linux)
 	cp libiconv_guess.so /usr/local/lib/
