@@ -38,7 +38,7 @@ extern "C" {
  * Parameters:
  *  const char *from       : Specifies the target charset.
  *  size_t from_size       : Specifies size of target charset.
- *  const char **encodings : Specifies encoding list to check. Former encoding precedes latter encoding.
+ *  const char **encodings : Specifies encoding list to check. Former encoding precedes latter encoding. The smaller a number of specifies, the more precise.
  *  char *guessed_enc      : Guessed encoding.
  *  int *error_num         : The number of error. Return -1 if failed to guess encoding.
  *  int allowed_error_num  : Specifies the allowed number of error. Break a guessing if exceed the allowed_error_num.
