@@ -13,7 +13,7 @@ int main(void)
 {
 	const char *encodings[] = {"EUC-JP", "SJIS", "UTF-8", NULL};
 	char from[BUF_SIZE];
-	const char *p_from;
+	char *p_from;
 	size_t from_size, p_from_size;
 	char to[BUF_SIZE];
 	char *p_to;
@@ -23,7 +23,7 @@ int main(void)
 
 	fgets(from, BUF_SIZE, stdin);
 
-	p_from = (const char *)from;
+	p_from = from;
 	p_to = to;
 	to_size = p_to_size = BUF_SIZE;
 	from_size = p_from_size = strlen(from);

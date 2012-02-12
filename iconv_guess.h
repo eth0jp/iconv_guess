@@ -36,7 +36,7 @@ extern "C" {
  * Guess encoding.
  *
  * Parameters:
- *  const char *from       : Specifies the target charset.
+ *  char *from             : Specifies the target charset.
  *  size_t from_size       : Specifies size of target charset.
  *  const char **encodings : Specifies encoding list to check. Former encoding precedes latter encoding. The smaller a number of specifies, the more precise.
  *  char *guessed_enc      : Guessed encoding.
@@ -46,14 +46,14 @@ extern "C" {
  * Return:
  *  void
  */
-extern void iconv_guess_encoding(const char *from, size_t from_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num);
+extern void iconv_guess_encoding(char *from, size_t from_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num);
 
 /*
  * iconv_guess_convert
  *
  * Parameters:
  *  const char *to_encoding : Specifies the destination encoding.
- *  const char **from       : Specifies the pointer of source charset.
+ *  char **from             : Specifies the pointer of source charset.
  *  size_t *from_size       : Specifies the size of source charset.
  *  char **to               : Specifies the pointer of destination charset.
  *  size_t *to_size         : Specifies the size of destination charset.
@@ -64,7 +64,7 @@ extern void iconv_guess_encoding(const char *from, size_t from_size, const char 
  *  int : The number of times that the iconv converted to. Return 0 if failed to guess encoding.
  *
  */
-extern int iconv_guess_convert(const char *to_encoding, const char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allowed_error_num);
+extern int iconv_guess_convert(const char *to_encoding, char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allowed_error_num);
 
 #ifdef __cplusplus
 }

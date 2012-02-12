@@ -23,7 +23,7 @@
 
 // guess encoding
 
-void iconv_guess_encoding(const char *from, size_t from_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num)
+void iconv_guess_encoding(char *from, size_t from_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num)
 {
 	const char *encoding;
 	char *p_from;
@@ -54,13 +54,16 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 	while (encodings[i]) {
 		// reset ptr
 		encoding = encodings[i];
-		p_from = (char*)from;
+		p_from = from;
 		p_from_size = from_size;
 		p_to = to;
 		p_to_size = to_size;
 
 		// init iconv
 		ic = iconv_open("UCS-4-INTERNAL", encoding);
+		if (ic==(iconv_t)-1) {
+			ic = iconv_open("UCS-4", encoding);
+		}
 		current_error_num = 0;
 		tmp_result_flag = 1;
 
@@ -86,6 +89,10 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 				break;
 			case E2BIG:
 				// continue: Input conversion stopped due to lack of space in the output buffer.
+				if (p_to==to) {
+					current_error_num = -1;
+					tmp_result_flag = 0;
+				}
 				p_to = to;
 				p_to_size = to_size;
 				break;
@@ -130,7 +137,7 @@ void iconv_guess_encoding(const char *from, size_t from_size, const char **encod
 
 // guess convert
 
-int iconv_guess_convert(const char *to_encoding, const char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allowed_error_num)
+int iconv_guess_convert(const char *to_encoding, char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allowed_error_num)
 {
 	char from_encoding[32];
 	int error_num;
@@ -154,7 +161,7 @@ int iconv_guess_convert(const char *to_encoding, const char **from, size_t *from
 		}
 
 		while (from_size && result_flag) {
-			ic_ret = iconv(ic, (char**)from, from_size, to, to_size);
+			ic_ret = iconv(ic, from, from_size, to, to_size);
 			conv_count++;
 
 			// break: no error
