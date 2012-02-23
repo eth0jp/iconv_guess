@@ -1,0 +1,16 @@
+iconv_guess (libiconv_guess)
+
+Please read the header file.
+
+Supported encodings:
+  It is supported if supported encoding by libiconv.
+  http://www.gnu.org/software/libiconv/
+
+Usage:
+  https://github.com/eth0jp/iconv_guess/blob/master/example.c
+
+Reference:
+  https://github.com/eth0jp/iconv_guess/blob/master/iconv_guess.h
+
+License:
+  LGPLv2.1 or later

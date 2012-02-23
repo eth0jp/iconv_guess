@@ -23,21 +23,21 @@
 
 // guess encoding
 
-void iconv_guess_encoding(char *from, size_t from_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num)
+void iconv_guess_encoding(char *from, size_t from_size, char *to, size_t to_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num)
 {
 	const char *encoding;
 	char *p_from;
 	size_t p_from_size;
-	unsigned int i;
+	int i;
 
 	// iconv
 	iconv_t ic;
 	size_t ic_ret;
-	unsigned int current_error_num;
+	int current_error_num;
 
 	// to
-	char *to, *p_to;
-	size_t to_size, p_to_size;
+	char *p_to;
+	size_t p_to_size;
 
 	// tmp result
 	char tmp_guessed_enc[32];
@@ -45,8 +45,6 @@ void iconv_guess_encoding(char *from, size_t from_size, const char **encodings, 
 	int tmp_result_flag;
 
 	// init memory
-	to = (char*)malloc(from_size);
-	to_size = from_size;
 	i = 0;
 	tmp_guessed_enc[0] = '\0';
 	min_error_num = -1;
@@ -127,7 +125,6 @@ void iconv_guess_encoding(char *from, size_t from_size, const char **encodings, 
 		i++;
 	}
 
-	free(to);
 	strcpy(guessed_enc, tmp_guessed_enc);
 	if (error_num) {
 		*error_num = min_error_num;
@@ -137,10 +134,10 @@ void iconv_guess_encoding(char *from, size_t from_size, const char **encodings, 
 
 // guess convert
 
-int iconv_guess_convert(const char *to_encoding, char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, int allowed_error_num)
+int iconv_guess_convert(const char *to_encoding, char **from, size_t *from_size, char **to, size_t *to_size, const char **encodings, char *guessed_enc, int *error_num, int allowed_error_num)
 {
-	char from_encoding[32];
-	int error_num;
+	char tmp_guessed_enc[32];
+	int tmp_error_num;
 	iconv_t ic;
 	size_t ic_ret;
 	int conv_count;
@@ -148,12 +145,17 @@ int iconv_guess_convert(const char *to_encoding, char **from, size_t *from_size,
 
 	conv_count = 0;
 	result_flag = 1;
-	iconv_guess_encoding(*from, *from_size, encodings, from_encoding, &error_num, allowed_error_num);
+	if (!guessed_enc) {
+		guessed_enc = tmp_guessed_enc;
+	}
+	if (!error_num) {
+		error_num = &tmp_error_num;
+	}
+	iconv_guess_encoding(*from, *from_size, *to, *to_size, encodings, guessed_enc, error_num, allowed_error_num);
 
-	if (-1<error_num) {
+	if (-1<*error_num) {
 		// use iconv
-		//printf("from_encoding: %s\n", from_encoding);
-		ic = iconv_open(to_encoding, from_encoding);
+		ic = iconv_open(to_encoding, guessed_enc);
 
 		// iconv open error
 		if (ic==(iconv_t)-1) {

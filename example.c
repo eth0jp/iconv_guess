@@ -19,7 +19,6 @@ int main(void)
 	char *p_to;
 	size_t to_size, p_to_size;
 	char enc[32];
-	int score;
 
 	fgets(from, BUF_SIZE, stdin);
 
@@ -28,11 +27,11 @@ int main(void)
 	to_size = p_to_size = BUF_SIZE;
 	from_size = p_from_size = strlen(from);
 
-	if (iconv_guess_convert("UTF-8", &p_from, &p_from_size, &p_to, &p_to_size, encodings, 0)==0) {
-		printf("encoding not found\n");
-		memcpy(to, from, p_from_size);
+	if (iconv_guess_convert("UTF-8", &p_from, &p_from_size, &p_to, &p_to_size, encodings, enc, NULL, 0)==0) {
+		printf("encoding is not found\n");
+		return 1;
 	}
-	printf("%s\n", to);
+	printf("%s: %s\n", enc, to);
 
 	return 0;
 }
